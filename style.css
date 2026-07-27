@@ -864,7 +864,10 @@ body {
   overflow: hidden;
 }
 .project-image--fragrance {
-  background: linear-gradient(135deg, #1a0e2e 0%, #3d1f5e 40%, #7b3fa0 70%, #c27bda 100%);
+  background-image: url('assets/debby-Fragrance-planet.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .project-image--realestate {
   background: linear-gradient(135deg, #0a1628 0%, #1a3352 40%, #2d5986 70%, #4a7fb5 100%);
