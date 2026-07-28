@@ -135,10 +135,19 @@ function handleFormSubmit(e) {
   const success = document.getElementById('formSuccess');
   const form    = document.getElementById('contactForm');
 
-  btn.textContent = 'Sending…';
-  btn.disabled = true;
+  const name    = document.getElementById('contactName').value.trim();
+  const email   = document.getElementById('contactEmail').value.trim();
+  const subject = document.getElementById('contactSubject').value.trim() || 'Contact from Portfolio Site';
+  const message = document.getElementById('contactMessage').value.trim();
+  const recipient = 'debbycoke123@gmail.com';
 
-  /* Simulate send (replace with real API later) */
+  const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+  const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  btn.textContent = 'Opening email…';
+  btn.disabled = true;
+  window.location.href = mailtoLink;
+
   setTimeout(() => {
     form.reset();
     btn.textContent = 'Message Sent!';
@@ -148,7 +157,7 @@ function handleFormSubmit(e) {
       btn.disabled = false;
       success.classList.remove('show');
     }, 5000);
-  }, 1400);
+  }, 1000);
 }
 
 /* ── Cursor glow (desktop only) ── */
