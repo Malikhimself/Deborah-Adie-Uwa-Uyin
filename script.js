@@ -44,6 +44,7 @@ if (hamburger && navLinks) {
   hamburger.addEventListener('click', () => {
     const open = navLinks.classList.toggle('open');
     hamburger.setAttribute('aria-expanded', open);
+    body.style.overflow = open ? 'hidden' : '';
     hamburger.querySelectorAll('span').forEach((s, i) => {
       if (open) {
         if (i === 0) s.style.cssText = 'transform:rotate(45deg) translate(5px,5px)';
@@ -59,6 +60,7 @@ if (hamburger && navLinks) {
   navLinks.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => {
       navLinks.classList.remove('open');
+      body.style.overflow = '';
       hamburger.querySelectorAll('span').forEach(s => s.style.cssText = '');
       hamburger.setAttribute('aria-expanded', 'false');
     });
@@ -68,13 +70,14 @@ if (hamburger && navLinks) {
   document.addEventListener('click', e => {
     if (!navbar.contains(e.target) && navLinks.classList.contains('open')) {
       navLinks.classList.remove('open');
+      body.style.overflow = '';
       hamburger.querySelectorAll('span').forEach(s => s.style.cssText = '');
     }
   });
 }
 
 /* ── Scroll-reveal animation ── */
-const animatedEls = document.querySelectorAll('.section-label, .section-title, .service-card, .skills-col, .timeline-item, .project-card, .edu-card, .about-text, .about-image-col, .writing-feature, .hero-text, .hero-visual, .stat-card, .contact-card, .contact-intro');
+const animatedEls = document.querySelectorAll('.section-label, .section-title, .service-card, .skills-col, .timeline-item, .project-card, .edu-card, .about-text, .about-image-col, .writing-feature, .hero-text, .hero-visual, .stat-card, .contact-card, .contact-intro, .why-text');
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry, idx) => {
@@ -100,22 +103,56 @@ animatedEls.forEach((el, i) => {
 const sections  = document.querySelectorAll('section[id]');
 const navAnchors = document.querySelectorAll('.nav-link[href^="#"]');
 
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      navAnchors.forEach(a => {
-        a.style.color = '';
-        a.style.background = '';
-      });
-      const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
-      if (active) active.style.color = 'var(--gold)';
+const clearActiveNav = () => {
+  navAnchors.forEach(a => a.classList.remove('active'));
+};
+
+const setActiveNav = (sectionId) => {
+  clearActiveNav();
+  const active = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+  if (active) active.classList.add('active');
+};
+
+const getActiveSectionId = () => {
+  const offset = navbar.offsetHeight + 32;
+  const scrollPos = window.scrollY + offset;
+  let activeSection = sections.length ? sections[0].id : '';
+
+  sections.forEach(section => {
+    const rect = section.getBoundingClientRect();
+    const sectionTop = window.scrollY + rect.top;
+    if (scrollPos >= sectionTop) {
+      activeSection = section.id;
     }
   });
-}, { threshold: 0.45 });
 
-sections.forEach(s => sectionObserver.observe(s));
+  return activeSection;
+};
 
-/* ── Smooth scroll offset (for fixed nav) ── */
+const updateActiveNav = () => {
+  const sectionId = getActiveSectionId();
+  if (sectionId) setActiveNav(sectionId);
+};
+
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+window.addEventListener('resize', updateActiveNav);
+
+const setActiveNavFromHash = () => {
+  const sectionId = window.location.hash.replace('#', '');
+  if (sectionId) {
+    setActiveNav(sectionId);
+  } else {
+    setActiveNav('about');
+  }
+};
+
+window.addEventListener('load', () => {
+  setActiveNavFromHash();
+  updateActiveNav();
+});
+window.addEventListener('hashchange', setActiveNavFromHash);
+
+/* ── Smooth scroll offset (for fixed nav) */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
     const target = document.querySelector(this.getAttribute('href'));
@@ -127,38 +164,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     }
   });
 });
-
-/* ── Contact form ── */
-function handleFormSubmit(e) {
-  e.preventDefault();
-  const btn     = document.getElementById('submitBtn');
-  const success = document.getElementById('formSuccess');
-  const form    = document.getElementById('contactForm');
-
-  const name    = document.getElementById('contactName').value.trim();
-  const email   = document.getElementById('contactEmail').value.trim();
-  const subject = document.getElementById('contactSubject').value.trim() || 'Contact from Portfolio Site';
-  const message = document.getElementById('contactMessage').value.trim();
-  const recipient = 'debbycoke123@gmail.com';
-
-  const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
-  const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-  btn.textContent = 'Opening email…';
-  btn.disabled = true;
-  window.location.href = mailtoLink;
-
-  setTimeout(() => {
-    form.reset();
-    btn.textContent = 'Message Sent!';
-    success.classList.add('show');
-    setTimeout(() => {
-      btn.textContent = 'Send Message ✦';
-      btn.disabled = false;
-      success.classList.remove('show');
-    }, 5000);
-  }, 1000);
-}
 
 /* ── Cursor glow (desktop only) ── */
 if (window.matchMedia('(pointer: fine)').matches) {
